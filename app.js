@@ -4,6 +4,8 @@ require('dotenv').config()
 //#region Node modules
 const path = require('path');
 const fs = require('fs/promises');
+const hbjs = require('handbrake-js')
+
 const { spawn } = require('child_process');
 const { createServer } = require('node:http');
 const { randomBytes } = require('node:crypto');
@@ -22,15 +24,19 @@ const { Server } = require('socket.io');
 const Videos = require('./models/Video');
 //#endregion
 
+//TODO: fix that
 const handBrakeCliProgramLocation = path.join(__dirname, 'lib');
 const staticPath = path.join(__dirname, 'src');
 
+
+//#region initialize express
 const express = require('express');
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
 let webSocket = null;
 const port = process.env.PORT
+//#endregion
 
 //#region Express App Configuration
 app.set('views', path.join(__dirname, 'src', 'views'));
@@ -49,7 +55,9 @@ app.get('/', (req, res) => {
     res.render("index");
 })
 
-app.post('/convertVideo', upload.single('video'), async (req, res, next) => {
+//#region endpoint upload video
+app.post('/convertVideo', upload.single('video'), async (req, res, next) =>
+{
     let handbrakeFileName = "";
     let newTitle = randomBytes(parseInt(process.env.RANDOM_NAME_SIZE)).toString('hex');
     const file = req.file;
@@ -121,6 +129,8 @@ app.post('/convertVideo', upload.single('video'), async (req, res, next) => {
     }
 })
 
+//#region gets
+
 app.get('/videos/:videoName', async (req, res) => {
     let videoName = req.params.videoName;
     try {
@@ -157,6 +167,9 @@ app.get('/library', async (req, res) => {
         res.status(400).send(error);
     }
 });
+
+//#endregion
+//#region delete
 
 app.delete('/library/:videoId', async (req, res) => {
     try {

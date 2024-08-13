@@ -15,12 +15,21 @@ let uploadVideo = async () => {
         body: formData
     };
 
-    const data = await fetch('/convertVideo', options);
-    console.log(data);
-    if (data.status == 200) {
-        window.location.replace(data.url);
-    } else {
-        alert(await data.text());
+    try
+    {
+        const data = await fetch('/convertVideo', options);
+
+        console.log(data);
+        if (data.status == 200) {
+            window.location.replace(data.url);
+        } else {
+            alert(await data.text());
+        }
+
+    }
+    catch(TypeError)
+    {
+        console.log("Erro, tipo de arquivo inválido")
     }
     // // The content-disposition header gets set by the express.js res.download() function. It is the filename.
     // let fileName = data.headers.get('Content-Disposition');
