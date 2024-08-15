@@ -10,7 +10,9 @@
         <form id="videoUploadForm" action="/convertVideo" method="post" class="col-12 col-sm-10" enctype="multipart/form-data">
             <div class="mb-3">
                 <label for="formVideoFile" class="form-label">Default file input example</label>
-                <input class="form-control" type="file" name="video" id="formVideoFile" required>
+
+                //seleciona o arquivo
+                <input class="form-control" type="file" accept=".mp4" name="video" id="formVideoFile" required>
             </div>
             <div class="d-grid">
                 <button id="submitVideoBtn" class="btn btn-primary" type="submit" disabled><i class="bi bi-cloud-arrow-up"></i> Upload</button>

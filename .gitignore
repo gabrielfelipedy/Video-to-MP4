@@ -140,7 +140,6 @@ dist
 
 # SQL Db
 *.db
-
 # TODO and test
 TODO.txt
 teste
