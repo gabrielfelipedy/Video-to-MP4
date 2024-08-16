@@ -49,53 +49,102 @@ app.get('/', (req, res) => {
     res.render("index");
 })
 
-app.post('/convertVideo', upload.single('video'), async (req, res, next) => {
-    let handbrakeFileName = "";
-    let newTitle = randomBytes(parseInt(process.env.RANDOM_NAME_SIZE)).toString('hex');
-    const file = req.file;
-    // Rename the file and add the video type
-    await fs.rename(path.join(__dirname, file.path), path.join(__dirname, 'uploads', `${file.originalname}`));
+app.post('/convertVideo', upload.array('video'), async (req, res) =>
+{
+    const files = req.files
+
+    if(!files || files.length === 0)
+    {
+        return res.status(400).send("No files uploaded");
+    }    
 
     try {
-        let dirs = await fs.opendir(handBrakeCliProgramLocation);
-        for await (const dirFile of dirs) {
-            if (dirFile.name.toLocaleLowerCase().includes('handbrakecli')) {
-                handbrakeFileName = dirFile.name;
-            }
+
+        const handbrakeFileName = await findHandBrakeCli()
+    
+        const conversionPromisses = files.map(async (file) =>
+        {
+            const newTitle = randomBytes(parseInt(process.env.RANDOM_NAME_SIZE)).toString('hex');
+
+            // Rename the file and add the video type
+            await fs.rename(path.join(__dirname, file.path), path.join(__dirname, 'uploads', `${file.originalname}`));
+
+            const handbrakeFilePath = path.join(__dirname, 'lib', handbrakeFileName);
+            const convertedFileName = `${newTitle}.mp4`;
+            const inputFilePath = `${path.join('.', file.originalname)}`
+            const outputFilePath = `${path.join('..', 'src', 'convertedVideos', convertedFileName)}`;
+
+            const handbrakeCliCmd = spawnHandbrakeCLI(handbrakeFilePath, inputFilePath, outputFilePath)
+
+            await handleConversion(handbrakeCliCmd, file, newTitle, convertedFileName)
+
+            return newTitle
+            
+        });
+
+        const convertedVideoNames = await Promise.all(conversionPromisses)
+        
+        //redirecionamento 
+
+        if(convertedVideoNames.length > 1)
+            res.redirect('/library')
+        else
+            res.redirect(`/videos/${convertedVideoNames[convertedVideoNames.length - 1]}`);
+
+    //#endregion
+    } catch (error) {
+        //console.log(`Erro em POST /convertVideo: ${error}`);
+        res.status(400).send(error.msg)
+    }
+})
+
+async function findHandBrakeCli()
+{
+    const dirs = await fs.opendir(handBrakeCliProgramLocation);
+
+    for await (const dirFile of dirs)
+    {
+        if(dirFile.name.toLocaleLowerCase().includes("handbrakecli"))
+        {
+            return dirFile.name
         }
+    }
 
-        const handbrakeFilePath = path.join(__dirname, 'lib', handbrakeFileName);
-        const convertedFileName = `${newTitle}.mp4`;
-        const inputFilePath = `${path.join('.', file.originalname)}`
-        const outputFilePath = `${path.join('..', 'src', 'convertedVideos', convertedFileName)}`;
+    return ''
+}
 
-        let handbrakeCliCmd;
+function spawnHandbrakeCLI(handbrakeFilePath, inputFilePath, outputFilePath)
+{
+    if(process.env.ENV_VAR == 'true')
+    {
+        return spawn('HandBrakeCLI', ['-i', inputFilePath, '-o', outputFilePath], { cwd: path.join(__dirname, 'uploads')})
+    }
 
-        console.log(process.env.ENV_VAR)
-        if (process.env.ENV_VAR === 'true') {
-            handbrakeCliCmd = spawn('HandBrakeCLI', ['-i', inputFilePath, '-o', outputFilePath], { cwd: path.join(__dirname, 'uploads')});
-        } else {
-            handbrakeCliCmd = spawn(handbrakeFilePath, ['-i', inputFilePath, '-o', outputFilePath], { cwd: path.join(__dirname, 'uploads')});
-        }
+    return spawn(handbrakeFilePath, ['-i', inputFilePath, '-o', outputFilePath], { cwd: path.join(__dirname, 'uploads')})
+}
 
-        //#region spawn listeners
+async function handleConversion(handbrakeCliCmd, file, newTitle, convertedFileName)
+{
+    return new Promise((resolve, reject) =>
+    {
         handbrakeCliCmd.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);
             webSocket.emit('uploadAndConversionStatus', {
                 msg: `${data}`
             })
-        })
+        });
 
         handbrakeCliCmd.stderr.on('data', (data) => {
             webSocket.emit('uploadAndConversionStatus', {
                 msg: `${data}`
             })
-          });
+        });
 
         handbrakeCliCmd.on('exit', async (code) => {
             console.log(`exit: ${code}`);
 
-            if (code === 0) {
+            if (code === 0)
+            {
                 webSocket.emit('uploadAndConversionStatus', {
                     msg: `${code}`
                 })
@@ -107,19 +156,16 @@ app.post('/convertVideo', upload.single('video'), async (req, res, next) => {
 
                 // Delete from the uploads folder
                 await fs.rm(`${path.join(__dirname, 'uploads', file.originalname)}`);
+
+                resolve()
     
-                res.redirect(`/videos/${newVideo.name}`);
             } else {
                 await fs.rm(`${path.join(__dirname, 'uploads', file.originalname)}`);
-                res.status(400).send({ code, error: "There was an error with the conversion."})
+                reject(new Error("There was an error with the conversion."))
             }
-        })
-        //#endregion
-    } catch (error) {
-        console.log(error);
-        res.status(400).send(error.msg)
-    }
-})
+        });
+    });
+}
 
 app.get('/videos/:videoName', async (req, res) => {
     let videoName = req.params.videoName;
@@ -138,7 +184,7 @@ app.get('/videos/:videoName', async (req, res) => {
             res.send('No video found!')
         }
     } catch (error) {
-        console.log(error);
+        console.log(`Ocorreu um erro assim: ${error}`);
         res.status(400).send(error);
     }
 })

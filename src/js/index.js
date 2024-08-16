@@ -16,11 +16,11 @@ let uploadVideo = async () => {
     };
 
     const data = await fetch('/convertVideo', options);
-    console.log(data);
+    //console.log(data);
     if (data.status == 200) {
         window.location.replace(data.url);
     } else {
-        alert(await data.text());
+        console.log(await data.text());
     }
     // // The content-disposition header gets set by the express.js res.download() function. It is the filename.
     // let fileName = data.headers.get('Content-Disposition');
