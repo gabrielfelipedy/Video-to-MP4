@@ -215,9 +215,9 @@ app.delete('/library/:videoId', async (req, res) => {
         });
 
         if (deleteResult === 1) {
-            res.status(200).send({msg: 'Video deleted successfully.'});
+            res.status(200).send({msg: 'Vídeo excluído com suceso.'});
         } else {
-            res.status(400).send({msg: 'There was an error deleting the video'});
+            res.status(400).send({msg: 'Ocorreu um erro ao excluir o vídeo'});
         }
 
     } catch (error) {

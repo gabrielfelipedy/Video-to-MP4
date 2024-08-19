@@ -1,14 +1,18 @@
 const socket = io();
 
 //#region DOM Elements
-let submitVideoBtn = document.getElementById('submitVideoBtn');
-let uploadAndConversionStatus = document.getElementById('uploadAndConversionStatus');
-let formVideoFile = document.getElementById('formVideoFile');
-let videoUploadForm = document.getElementById('videoUploadForm');
+const submitVideoBtn = document.getElementById('submitVideoBtn');
+const uploadAndConversionStatus = document.getElementById('uploadAndConversionStatus');
+const formVideoFile = document.getElementById('formVideoFile');
+const videoUploadForm = document.getElementById('videoUploadForm');
+const fileName = document.getElementById('file-name');
+const fileNameDiv = document.getElementById('file-name-div');
+
+const selectFile = document.getElementById('select-file');
 //#endregion
 
 //#region Functions
-let uploadVideo = async () => {
+const uploadVideo = async () => {
     let formData = new FormData(videoUploadForm);
     const options = {
         method: 'POST',
@@ -53,12 +57,30 @@ videoUploadForm.addEventListener('submit', function(e) {
     submitVideoBtn.disabled = true;
 })
 
-formVideoFile.addEventListener('input', function(e) {
-    if (this.value.length > 0) {
-        submitVideoBtn.disabled = false;
+formVideoFile.addEventListener('input', function(event) {
+    if (this.value.length > 0)
+    {
+        submitVideoBtn.classList.remove('d-none')
+        fileNameDiv.classList.remove('d-none')
+        selectFile.classList.add('d-none')
+
+        fileName.textContent = ''
+
+        for(let i = 0; i < event.target.files.length; i++)
+        {
+            //alert(event.target.files[i].name)
+            const li = document.createElement('li')
+            li.innerHTML = event.target.files[i].name
+
+            fileName.appendChild(li)
+        }
+        //fileName.textContent = event.target.files[0].name
     } else {
-        submitVideoBtn.disabled = true;
+        submitVideoBtn.classList.contains('d-none') ? 0 : submitVideoBtn.classList.add('d-none')
+        fileNameDiv.classList.contains('d-none') ? 0 : fileNameDiv.classList.add('d-none')
     }
+
+    //alert("Funciona")
 })
 
 submitVideoBtn.addEventListener('click', function(e) {

@@ -3,26 +3,34 @@
 <main class="container pt-3">
     <div class="row justify-content-center">
         <div class="col-12 text-center">
-            <h1>
-                Please select a video to upload and convert
+            <h1 style="margin: 3rem 0;">
+                Selecione um vídeo para converter
             </h1>
         </div>
         <form id="videoUploadForm" action="/convertVideo" method="post" class="col-12 col-sm-10" enctype="multipart/form-data">
-            <div class="mb-3">
-                <label for="formVideoFile" class="form-label">Default file input example</label>
+            <div class="mb-3 d-flex justify-content-evenly align-items-center">
 
                 <!-- //seleciona o arquivo -->
-                <input class="form-control" multiple type="file" accept=".mp4" name="video" id="formVideoFile" required>
+                <label id="select-file" for="formVideoFile" class="form-label" style="padding: 0.7rem; background-color: #333; color: #FFF; text-align: center; display: block; margin-top: 10px; cursor: pointer; border-radius: 0.5rem; width: 30%; max-width: 230px">Selecione o arquivo</label>
+
+                <div id="file-name-div" class="d-none">
+                    <h5 class="mb-4 text-center">Arquivos carregados:</h5>
+
+                    <ul id="file-name" class="list-unstyled"></ul>
+                </div>
+                
+                <input class="form-control d-none" multiple type="file" accept=".mp4, .mkv" name="video" id="formVideoFile" required>
+                
             </div>
-            <div class="d-grid">
-                <button id="submitVideoBtn" class="btn btn-primary" type="submit" disabled><i class="bi bi-cloud-arrow-up"></i> Upload</button>
+            <div class="d-flex justify-content-center">
+                <button id="submitVideoBtn" class="btn btn-primary d-none" type="submit" style="padding: 0.7rem; cursor: pointer; border-radius: 0.5rem; width: 30%; max-width: 230px"><i class="bi bi-cloud-arrow-up" style="text-wrap: nowrap;"></i> Fazer Upload</button>
             </div>
         </form>
         <div class="col-12 col-sm-10 mt-3">
-            <div class="card">
+            <div class="card" style="margin-top: 3rem;">
                 <div class="card-body">
-                    <div class="card-title">
-                        Server Messages
+                    <div class="card-title text-secondary">
+                        Mensagens do servidor
                     </div>
                     <div class="card-text overflow-auto" id="uploadAndConversionStatus">
 

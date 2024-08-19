@@ -6,3 +6,7 @@
     height: 25vh;
     width: 25vw;
 }
+
+main, body {
+   font-family: "Inter", sans-serif; 
+}

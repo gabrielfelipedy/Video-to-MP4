@@ -4,7 +4,7 @@
     <div class="row h-100">
         <% if (emptyLibrary) { %>
             <div class="col-12 mt-3 mb-3">
-                <h1>Empty library! <i class="bi bi-emoji-frown"></i></h1>
+                <h1>Biblioteca vazia! <i class="bi bi-emoji-frown"></i></h1>
             </div>
         <% } else { %>
             <% videos.forEach(function (video) { %>
@@ -20,8 +20,8 @@
                                 </div>
                                 <div class="col-12 pb-3">
                                     <div class="d-grid gap-2">
-                                        <a href="<%= video.location %>" download class="btn btn-success" data-id="<%= video.id %>">Download <i class="bi bi-cloud-download"></i></a>
-                                        <button id="deleteVideoButton" class="btn btn-danger" data-id="<%= video.id %>">Delete <i class="bi bi-trash"></i></button>
+                                        <a href="<%= video.location %>" download class="btn btn-success" data-id="<%= video.id %>">Baixar <i class="bi bi-cloud-download"></i></a>
+                                        <button id="deleteVideoButton" class="btn btn-danger" data-id="<%= video.id %>">Excluir <i class="bi bi-trash"></i></button>
                                     </div>
                                 </div>
                             </div>
